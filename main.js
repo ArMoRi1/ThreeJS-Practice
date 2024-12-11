@@ -1,151 +1,170 @@
-
-//
-// import getStarfield from "./src/getStarfield.js";
-//
-// const w = window.innerWidth;
-// const h = window.innerHeight;
-// const scene = new THREE.Scene();
-
-// let camera = new THREE.PerspectiveCamera(45, window.innerWidth/innerHeight);
-// camera.position.z = 5;
-// const renderer = new THREE.WebGLRenderer();
-// renderer.setSize(w, h);
-//
-// document.body.appendChild(renderer.domElement);
-//
-//
-//
-// const earthGroup = new THREE.Group();
-// earthGroup.rotation.z = -23.4 * Math.PI / 180;
-// scene.add(earthGroup);
-// new OrbitControls(camera, renderer.domElement);
-// const loader = new THREE.TextureLoader();
-// const geometry = new THREE.IcosahedronGeometry(1,8);
-//
-// const material = new THREE.MeshPhongMaterial({
-//     // map: loader.load("./textures/00_earthmap1k.jpg"),
-//     // specularMap: loader.load("./textures/02_earthspec1k.jpg"),
-//     // bumpMap: loader.load("./textures/01_earthbump1k.jpg"),
-//     // bumpScale: 0.04,
-//     roughness : 1,
-//     metalness: 0,
-//     map: loader.load("./textures/00_earthmap1k.jpg"),
-//
-//
-// });
-//
-// const earthMesh = new THREE.Mesh(geometry, material);
-// earthGroup.add(earthMesh);
-//
-// const lightsMat = new THREE.MeshBasicMaterial({
-//     map: loader.load("./textures/03_earthlights1k.jpg"),
-//     blending: THREE.AdditiveBlending,
-// });
-// const lightsMesh = new THREE.Mesh(geometry, lightsMat);
-// earthGroup.add(lightsMesh);
-//
-// const stars = getStarfield({numStars:10000});
-// scene.add(stars);
-//
-//
-//
-// const sunLight = new THREE.DirectionalLight(0xffffff);
-// sunLight.position.set(-2, 0.5, 1.5);
-// scene.add(sunLight);
-//
-// function animate(){
-//     requestAnimationFrame(animate);
-//     // earthMesh.rotation.x += 0.001;
-//     earthMesh.rotation.y += 0.002;
-//     lightsMesh.rotation.y += 0.002;
-//     renderer.render(scene, camera);
-// }
-//
-// animate();
-
 import * as THREE from 'three';
 import { OrbitControls } from 'jsm/controls/OrbitControls.js';
 import getStarfield from "./src/getStarfield.js";
 
-let scene;
-let camera;
-let renderer;
+let scene, camera, renderer;
 
+// Функція для створення планет
+function createPlanet({ radius, texture, bumpMap, bumpScale, position }) {
+    const loader = new THREE.TextureLoader();
 
-function main()
-{
+    const geometry = new THREE.SphereGeometry(radius, 32, 32);
+    const material = new THREE.MeshPhongMaterial({
+        // roughness: 1,
+        // metalness: 0,
+        map: loader.load(texture),
+        bumpMap: loader.load(bumpMap),
+        bumpScale: bumpScale,
+    });
+
+    const planet = new THREE.Mesh(geometry, material);
+    planet.position.set(...position);
+    return planet;
+}
+
+function main() {
     const canvas = document.querySelector('#c');
-
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
+
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 2;
+    camera.position.z = 7;
     scene.add(camera);
 
-    renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true,});
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-
     renderer.autoClear = false;
-    renderer.setClearColor(0x00000, 0.0);
+    renderer.setClearColor(0x000000, 0.0);
 
     new OrbitControls(camera, renderer.domElement);
-    // create earthgeometry
-    const loader = new THREE.TextureLoader()
-    const earthgeometry = new THREE.SphereGeometry(0.6,32,32);
 
-    const eatrhmaterial = new THREE.MeshPhongMaterial({
-        roughness : 1,
-        metalness:0,
-        map: loader.load('textures/earthmap1k.jpg'),
-        bumpMap: loader.load('textures/earthbump.jpg'),
+    // Створення Сонця
+    const Sun = createPlanet({
+        radius: 0.6,
+        texture: 'textures/0sun/sunmap.jpg',
+        bumpMap: 'textures/0sun/sunmap.jpg',
         bumpScale: 300,
+        position: [0, 0, 0]
     });
+    scene.add(Sun);
 
-    const earthmesh = new THREE.Mesh(earthgeometry,eatrhmaterial);
+    // Створення Меркурія
+    const mercury = createPlanet({
+        radius: 0.38,
+        texture: 'textures/1mercury/mercurymap.jpg',
+        bumpMap: 'textures/1mercury/mercurybump.jpg',
+        bumpScale: 100,
+        position: [1, 0, 1]
+    });
+    scene.add(mercury);
 
-    scene.add(earthmesh);
+    // Створення Венери
+    const venus = createPlanet({
+        radius: 0.95,
+        texture: 'textures/2venus/venusmap.jpg',
+        bumpMap: 'textures/2venus/venusbump.jpg',
+        bumpScale: 100,
+        position: [1.87, 0, 1.87]
+    });
+    scene.add(venus);
 
-    // set ambientlight
+    // Створення Землі
+    const earth = createPlanet({
+        radius: 1,
+        texture: 'textures/3earth/earthmap1k.jpg',
+        bumpMap: 'textures/3earth/earthbump.jpg',
+        bumpScale: 300,
+        position: [2.58, 0, 2.58]
+    });
+    scene.add(earth);
 
-    const ambientlight = new THREE.AmbientLight(0xffffff, 0.1);
-    scene.add(ambientlight);
+    // Створення Марса
+    const mars = createPlanet({
+        radius: 0.53,
+        texture: 'textures/4mars/marsmap1k.jpg',
+        bumpMap: 'textures/4mars/marsbump1k.jpg',
+        bumpScale: 300,
+        position: [3.94, 0, 3.94]
+    });
+    scene.add(mars);
 
-    // set point light
+    // Створення Юпітера
+    const jupiter = createPlanet({
+        radius: 10.96,
+        texture: 'textures/5jupiter/jupitermap.jpg',
+        bumpMap: 'textures/5jupiter/jupitermap.jpg',
+        bumpScale: 10,
+        position: [13.43, 0, 13.43]
+    });
+    scene.add(jupiter);
 
-    const pointerlight =  new THREE.PointLight(0xffffff,100);
+    // Створення Сатурна
+    const saturn = createPlanet({
+        radius: 9.14,
+        texture: 'textures/6saturn/saturnmap.jpg',
+        bumpMap: 'textures/6saturn/saturnmap.jpg',
+        bumpScale: 10,
+        position: [	24.68, 0, 24.68]
+    });
+    scene.add(saturn);
 
-    // set light position
+    // Створення Урана
+    const uranus = createPlanet({
+        radius: 3.98,
+        texture: 'textures/7uranus/uranusmap.jpg',
+        bumpMap: 'textures/7uranus/uranusmap.jpg',
+        bumpScale: 10,
+        position: [49.58, 0, 49.58]
+    });
+    scene.add(uranus);
 
-    pointerlight.position.set(5,3,5);
-    scene.add(pointerlight);
+    // Створення Нептуна
+    const neptune = createPlanet({
+        radius: 3.86,
+        texture: 'textures/8neptune/neptunemap.jpg',
+        bumpMap: 'textures/8neptune/neptunemap.jpg',
+        bumpScale: 10,
+        position: [77.49, 0, 77.49]
+    });
+    scene.add(neptune);
 
-    // cloud
-    const cloudgeometry =  new THREE.SphereGeometry(0.63,32,32);
-
-    const cloudmaterial = new THREE.MeshPhongMaterial({
-        map: loader.load('textures/earthCloud.png'),
+    // Створення хмар для Землі
+    const cloudGeometry = new THREE.SphereGeometry(1.1, 32, 32);
+    const cloudMaterial = new THREE.MeshPhongMaterial({
+        map: new THREE.TextureLoader().load('textures/3earth/earthCloud.png'),
         transparent: true
     });
+    const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+    clouds.position.copy(earth.position);
+    scene.add(clouds);
 
-    const cloudmesh = new THREE.Mesh(cloudgeometry,cloudmaterial);
-    scene.add(cloudmesh);
+    // Додавання освітлення
+    // Sun.material.emissive = new THREE.Color(0xffa500); // Додано емісійне освітлення (помаранчевий колір)
+    // Sun.material.emissiveIntensity = 1; // Інтенсивність емісії
+    // scene.add(Sun);
 
-    // star
-    const stars = getStarfield({numStars:5000});
+    // const sunLight = new THREE.PointLight(0xffffff, 10000, 100000);
+    // sunLight.position.set(0, 0, 0);  // Встановити позицію світла на позицію Сонця
+    // scene.add(sunLight);
+
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambientLight);
+
+
+    // Додавання зірок
+    const stars = getStarfield({ numStars: 5000 });
     scene.add(stars);
 
-    const animate = () =>{
+    // Анімація
+    const animate = () => {
         requestAnimationFrame(animate);
-        earthmesh.rotation.y -= 0.0015;
-        cloudmesh.rotation.y += 0.0015;
-        render();
-    }
-
-    const render = () => {
-        renderer.render(scene,camera);
-    }
+        earth.rotation.y -= 0.0015;
+        clouds.rotation.y += 0.0015;
+        renderer.render(scene, camera);
+    };
 
     animate();
 }
