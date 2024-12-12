@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 export default function getStarfield({ numStars = 500 } = {}) {
   function randomSpherePoint() {
-    const radius = Math.random() * 25 + 25;
+    const radius = Math.random() * 250 + 25;
     const u = Math.random();
     const v = Math.random();
     const theta = 2 * Math.PI * u;
@@ -14,7 +14,7 @@ export default function getStarfield({ numStars = 500 } = {}) {
     return {
       pos: new THREE.Vector3(x, y, z),
       hue: 0.6,
-      minDist: radius,
+      minDist: radius*radius,
     };
   }
   const verts = [];
