@@ -4,11 +4,11 @@ import getStarfield from "./src/getStarfield.js";
 // import {textureLoad} from "three/build/three.tsl";
 
 let scene, camera, renderer;
-
+const loader = new THREE.TextureLoader();
 // Функція для створення планет
 
 function createPlanet({ radius, texture, bumpMap, bumpScale, position, isSun = false, ring }) {
-    const loader = new THREE.TextureLoader();
+    // const loader = new THREE.TextureLoader();
 
     const geometry = new THREE.SphereGeometry(radius, 32, 32);
     const material = isSun
@@ -54,6 +54,36 @@ function createPlanet({ radius, texture, bumpMap, bumpScale, position, isSun = f
 
     return { planet, planetOrbit };
 }
+
+// Функція для створення астероїдів
+function createAsteroid(position, radius) {
+    const geometry = new THREE.SphereGeometry(radius, 16, 16);
+    const material = new THREE.MeshStandardMaterial({ color: 0x888888 });
+    const asteroid = new THREE.Mesh(geometry, material);
+
+    asteroid.position.set(...position);
+    return asteroid;
+}
+
+//Функція для створення кільця астероїдів
+function createAsteroidBelt(innerRadius, outerRadius, numAsteroids) {
+    const asteroidBelt = new THREE.Object3D();
+
+    for (let i = 0; i < numAsteroids; i++) {
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = innerRadius + Math.random() * (outerRadius - innerRadius);
+        const x = distance * Math.cos(angle);
+        const z = distance * Math.sin(angle);
+        const y = (Math.random() - 0.5) * 2; // Невелике коливання по осі Y
+
+        const asteroid = createAsteroid([x, y, z], Math.random() * 0.3 + 0.1);  // Випадковий розмір астероїда
+        asteroidBelt.add(asteroid);
+    }
+
+    scene.add(asteroidBelt);
+    return asteroidBelt;
+}
+
 
 function main() {
     const canvas = document.querySelector('#c');
@@ -119,6 +149,7 @@ function main() {
         bumpScale: 300,
         position: [35, 0, 35]
     });
+    const asteroidBelt = createAsteroidBelt(55, 63, 500);
 
     const jupiter = createPlanet({
         radius: 8,
@@ -159,6 +190,8 @@ function main() {
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
 
+
+    //Додавання зірок
     const stars = getStarfield({ numStars: 5000 });
     scene.add(stars);
 
@@ -167,6 +200,8 @@ function main() {
         requestAnimationFrame(animate);
 
         // Rotation of planets and their orbits
+        // starMesh.rotateY(0.000004);
+
         Sun.planetOrbit.rotateY(0.0004);
         Sun.planet.rotateY(0.0004);
 
@@ -181,6 +216,8 @@ function main() {
 
         mars.planetOrbit.rotateY(0.002);
         mars.planet.rotateY(0.002);
+
+        asteroidBelt.rotateY(0.0005);
 
         jupiter.planetOrbit.rotateY(0.0010);
         jupiter.planet.rotateY(0.0010);
