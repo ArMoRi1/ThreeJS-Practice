@@ -106,6 +106,68 @@ function createAsteroidBelt(innerRadius, outerRadius, numAsteroids) {
     scene.add(asteroidBelt);
     return asteroidBelt;
 }
+}
+
+// function moveToObject(object, duration) {
+//     const targetPosition = new THREE.Vector3().copy(object.position);
+//     const startPosition = new THREE.Vector3().copy(camera.position);
+//     const startTime = performance.now();
+//     const finalCameraPosition = new THREE.Vector3(
+//         targetPosition.x - 20,  // Змістити на 20 одиниць ліворуч
+//         targetPosition.y + 10,  // Змістити на 10 одиниць вгору
+//         targetPosition.z + 30   // Змістити на 30 одиниць вперед
+//     );
+//
+//     function animateMove() {
+//         const elapsed = (performance.now() - startTime) / 1000;  // Час у секундах
+//         const t = Math.min(elapsed / duration, 1);  // Часова інтерполяція (від 0 до 1)
+//
+//         // Плавне переміщення камери
+//         camera.position.lerpVectors(startPosition, targetPosition*3, t);
+//
+//         // Поворот камери, щоб дивитися на об'єкт
+//         camera.lookAt(object.position);
+//
+//         if (t < 1) {
+//             requestAnimationFrame(animateMove);
+//         }
+//     }
+//
+//     animateMove();
+// }
+
+function moveToObject(object, duration) {
+    const objectPosition = new THREE.Vector3().copy(object.position);
+    // Отримуємо радіус з геометрії об'єкта
+    const objectRadius = object.geometry.parameters.radius;
+    const startPosition = new THREE.Vector3().copy(camera.position);
+    const startTime = performance.now();
+
+    // Визначаємо напрямок від камери до об'єкта
+    const direction = new THREE.Vector3().subVectors(objectPosition, startPosition).normalize();
+
+    // Встановлюємо фінальну позицію камери з урахуванням радіусу
+    const multiplier = 4; // Множник для радіусу (можна налаштувати)
+    const distanceFromObject = objectRadius * multiplier;
+    const finalCameraPosition = new THREE.Vector3()
+        .copy(objectPosition)
+        .sub(direction.multiplyScalar(distanceFromObject));
+
+    function animateMove() {
+        const elapsed = (performance.now() - startTime) / 1000;
+        const t = Math.min(elapsed / duration, 1);
+
+        camera.position.lerpVectors(startPosition, finalCameraPosition, t);
+        camera.lookAt(objectPosition);
+
+        if (t < 1) {
+            requestAnimationFrame(animateMove);
+        }
+    }
+
+    animateMove();
+}
+
 
 function main() {
     const canvas = document.querySelector('#c');
@@ -282,6 +344,7 @@ function main() {
                     infoBox.style.left = `${event.clientX + 20}px`;
                     infoBox.style.top = `${event.clientY + 20}px`;
                 }
+                moveToObject(selectedPlanet, 2);
             }
         } else {
             // Click outside of any planet - hide the info box
