@@ -105,7 +105,7 @@ function createAsteroidBelt(innerRadius, outerRadius, numAsteroids) {
     }
     scene.add(asteroidBelt);
     return asteroidBelt;
-}
+
 }
 
 // function moveToObject(object, duration) {
