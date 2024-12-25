@@ -3,9 +3,12 @@ import { OrbitControls } from 'jsm/controls/OrbitControls.js';
 import getStarfield from "./src/getStarfield.js";
 
 let scene, camera, renderer, raycaster, mouse;
+let isAnimationRunning = true;
 const loader = new THREE.TextureLoader();
 
+
 const planets = []; // Масив для збереження планет і Сонця
+const planetObjects = {}; // Об'єкт для збереження посилань на планети // Масив для збереження планет і Сонця
 const planetInfo = {
     "Sun": {
         name: "The Sun",
@@ -58,8 +61,7 @@ function createPlanet({ radius, texture, bumpMap, bumpScale, position, isSun = f
 
     const planet = new THREE.Mesh(geometry, material);
     planet.position.set(...position);
-    // Add the name as a custom property to the mesh
-    planet.userData.planetName = name;  // Store name in userData
+    planet.userData.planetName = name;
 
     const planetOrbit = new THREE.Object3D();
     planetOrbit.add(planet);
@@ -80,8 +82,13 @@ function createPlanet({ radius, texture, bumpMap, bumpScale, position, isSun = f
     }
 
     scene.add(planetOrbit);
+
+    // Store the planet reference in planetObjects
+    planetObjects[name] = planet;
+
     return { planet, planetOrbit };
 }
+
 // Функція для створення астероїдів
 function createAsteroid(position, radius) {
     const geometry = new THREE.SphereGeometry(radius, 16, 16);
@@ -108,66 +115,86 @@ function createAsteroidBelt(innerRadius, outerRadius, numAsteroids) {
 
 }
 
-// function moveToObject(object, duration) {
-//     const targetPosition = new THREE.Vector3().copy(object.position);
-//     const startPosition = new THREE.Vector3().copy(camera.position);
-//     const startTime = performance.now();
-//     const finalCameraPosition = new THREE.Vector3(
-//         targetPosition.x - 20,  // Змістити на 20 одиниць ліворуч
-//         targetPosition.y + 10,  // Змістити на 10 одиниць вгору
-//         targetPosition.z + 30   // Змістити на 30 одиниць вперед
-//     );
-//
-//     function animateMove() {
-//         const elapsed = (performance.now() - startTime) / 1000;  // Час у секундах
-//         const t = Math.min(elapsed / duration, 1);  // Часова інтерполяція (від 0 до 1)
-//
-//         // Плавне переміщення камери
-//         camera.position.lerpVectors(startPosition, targetPosition*3, t);
-//
-//         // Поворот камери, щоб дивитися на об'єкт
-//         camera.lookAt(object.position);
-//
-//         if (t < 1) {
-//             requestAnimationFrame(animateMove);
-//         }
-//     }
-//
-//     animateMove();
-// }
+// Функція для переміщення камери до об'єкта
+// Update the moveToObject function
+function moveToObject(object) {
+    if (!object) return;
 
-function moveToObject(object, duration) {
     const objectPosition = new THREE.Vector3().copy(object.position);
-    // Отримуємо радіус з геометрії об'єкта
     const objectRadius = object.geometry.parameters.radius;
-    const startPosition = new THREE.Vector3().copy(camera.position);
-    const startTime = performance.now();
 
-    // Визначаємо напрямок від камери до об'єкта
-    const direction = new THREE.Vector3().subVectors(objectPosition, startPosition).normalize();
+    // Calculate camera position based on object size
+    const distance = objectRadius * 5; // Reduced multiplier for closer view
+    const offset = new THREE.Vector3(distance, distance * 0.5, distance);
+    const targetPosition = new THREE.Vector3().copy(objectPosition).add(offset);
 
-    // Встановлюємо фінальну позицію камери з урахуванням радіусу
-    const multiplier = 4; // Множник для радіусу (можна налаштувати)
-    const distanceFromObject = objectRadius * multiplier;
-    const finalCameraPosition = new THREE.Vector3()
-        .copy(objectPosition)
-        .sub(direction.multiplyScalar(distanceFromObject));
+    // Animation settings
+    const duration = 1000;
+    const start = camera.position.clone();
+    const startTime = Date.now();
 
-    function animateMove() {
-        const elapsed = (performance.now() - startTime) / 1000;
-        const t = Math.min(elapsed / duration, 1);
+    function animate() {
+        const now = Date.now();
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
 
-        camera.position.lerpVectors(startPosition, finalCameraPosition, t);
+        // Smooth easing function
+        const ease = progress * (2 - progress);
+
+        camera.position.lerpVectors(start, targetPosition, ease);
         camera.lookAt(objectPosition);
 
-        if (t < 1) {
-            requestAnimationFrame(animateMove);
+        if (progress < 1) {
+            requestAnimationFrame(animate);
         }
     }
 
-    animateMove();
+    animate();
 }
 
+// Додавання обробників подій для меню
+function setupMenuListeners() {
+    const menuItems = document.querySelectorAll('.header-menu li');
+    menuItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const planetName = item.textContent;
+            const planet = planetObjects[planetName];
+
+            if (planet) {
+                moveToObject(planet);
+
+                // Show planet information
+                const infoBox = document.getElementById('infoBox');
+                const planetNameElement = document.getElementById('planetName');
+                const planetInfoText = document.getElementById('planetInfo');
+
+                planetNameElement.innerText = planetInfo[planetName].name;
+                planetInfoText.innerText = planetInfo[planetName].info;
+                infoBox.style.display = 'block';
+
+                // Position the info box
+                infoBox.style.left = '20px';
+                infoBox.style.top = '100px';
+            }
+        });
+    });
+}
+
+const animationButton = document.getElementById('animationButton');
+const playIcon = animationButton.querySelector('.play-icon');
+const pauseIcon = animationButton.querySelector('.pause-icon');
+
+animationButton.addEventListener('click', () => {
+    isAnimationRunning = !isAnimationRunning;
+
+    if (isAnimationRunning) {
+        pauseIcon.style.display = 'block';
+        playIcon.style.display = 'none';
+    } else {
+        pauseIcon.style.display = 'none';
+        playIcon.style.display = 'block';
+    }
+});
 
 function main() {
     const canvas = document.querySelector('#c');
@@ -351,21 +378,23 @@ function main() {
             infoBox.style.display = 'none';
         }
     }
-
+    setupMenuListeners();
     // Анімація
     const animate = () => {
         requestAnimationFrame(animate);
 
-        Sun.planetOrbit.rotateY(0.0004);
-        mercury.planetOrbit.rotateY(0.009);
-        venus.planetOrbit.rotateY(0.006);
-        earth.planetOrbit.rotateY(0.004);
-        mars.planetOrbit.rotateY(0.002);
-        asteroidBelt.rotateY(0.0005);
-        jupiter.planetOrbit.rotateY(0.0010);
-        saturn.planetOrbit.rotateY(0.0008);
-        uranus.planetOrbit.rotateY(0.0006);
-        neptune.planetOrbit.rotateY(0.0004);
+        if (isAnimationRunning) {
+            Sun.planetOrbit.rotateY(0.0004);
+            mercury.planetOrbit.rotateY(0.009);
+            venus.planetOrbit.rotateY(0.006);
+            earth.planetOrbit.rotateY(0.004);
+            mars.planetOrbit.rotateY(0.002);
+            asteroidBelt.rotateY(0.0005);
+            jupiter.planetOrbit.rotateY(0.0010);
+            saturn.planetOrbit.rotateY(0.0008);
+            uranus.planetOrbit.rotateY(0.0006);
+            neptune.planetOrbit.rotateY(0.0004);
+        }
 
         renderer.render(scene, camera);
     };
