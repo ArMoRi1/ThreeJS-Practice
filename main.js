@@ -117,35 +117,73 @@ function createAsteroidBelt(innerRadius, outerRadius, numAsteroids) {
 
 // Функція для переміщення камери до об'єкта
 // Update the moveToObject function
+let isMovingCamera = false;
+let controls; // Move OrbitControls to global scope
+
+
+
 function moveToObject(object) {
     if (!object) return;
 
-    const objectPosition = new THREE.Vector3().copy(object.position);
+    // First, pause the system animation
+    isAnimationRunning = false;
+    const pauseIcon = document.querySelector('.pause-icon');
+    const playIcon = document.querySelector('.play-icon');
+    if (pauseIcon && playIcon) {
+        pauseIcon.style.display = 'none';
+        playIcon.style.display = 'block';
+    }
+
+    // If camera is already moving, stop the current animation
+    if (isMovingCamera) {
+        isMovingCamera = false;
+        return;
+    }
+
+    isMovingCamera = true;
     const objectRadius = object.geometry.parameters.radius;
-
-    // Calculate camera position based on object size
-    const distance = objectRadius * 5; // Reduced multiplier for closer view
+    const distance = objectRadius * 5;
     const offset = new THREE.Vector3(distance, distance * 0.5, distance);
-    const targetPosition = new THREE.Vector3().copy(objectPosition).add(offset);
 
-    // Animation settings
     const duration = 1000;
-    const start = camera.position.clone();
+    const startCameraPos = camera.position.clone();
     const startTime = Date.now();
 
+    // Disable OrbitControls during animation
+    controls.enabled = false;
+
     function animate() {
+        if (!isMovingCamera) {
+            isMovingCamera = false;
+            controls.enabled = true;  // Re-enable controls if animation is stopped
+            return;
+        }
+
         const now = Date.now();
         const elapsed = now - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
-        // Smooth easing function
         const ease = progress * (2 - progress);
 
-        camera.position.lerpVectors(start, targetPosition, ease);
-        camera.lookAt(objectPosition);
+        const worldPosition = new THREE.Vector3();
+        object.getWorldPosition(worldPosition);
+
+        const currentTargetPosition = new THREE.Vector3()
+            .copy(worldPosition)
+            .add(offset);
+
+        camera.position.lerpVectors(startCameraPos, currentTargetPosition, ease);
+        camera.lookAt(worldPosition);
 
         if (progress < 1) {
             requestAnimationFrame(animate);
+        } else {
+            isMovingCamera = false;
+            controls.enabled = true;  // Re-enable controls after animation
+
+            // Set the OrbitControls target to the object's position
+            controls.target.copy(worldPosition);
+            controls.update();
         }
     }
 
@@ -209,8 +247,8 @@ function main() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    new OrbitControls(camera, renderer.domElement);
-
+    // new OrbitControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
