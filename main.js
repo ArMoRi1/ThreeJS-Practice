@@ -5,7 +5,8 @@ import getStarfield from "./src/getStarfield.js";
 let scene, camera, renderer, raycaster, mouse;
 let isAnimationRunning = true;
 const loader = new THREE.TextureLoader();
-
+let isMovingCamera = false;
+let controls;
 
 const planets = []; // Масив для збереження планет і Сонця
 const planetObjects = {}; // Об'єкт для збереження посилань на планети // Масив для збереження планет і Сонця
@@ -117,8 +118,7 @@ function createAsteroidBelt(innerRadius, outerRadius, numAsteroids) {
 
 // Функція для переміщення камери до об'єкта
 // Update the moveToObject function
-let isMovingCamera = false;
-let controls; // Move OrbitControls to global scope
+// Move OrbitControls to global scope
 
 
 
@@ -249,6 +249,11 @@ function main() {
 
     // new OrbitControls(camera, renderer.domElement);
     controls = new OrbitControls(camera, renderer.domElement);
+
+    controls.enableZoom = true; // Вмикаємо можливість зуму
+    controls.zoomSpeed = 5;
+    controls.minDistance = 5;    // Мінімальна відстань зуму
+
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
