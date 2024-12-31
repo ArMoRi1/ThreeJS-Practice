@@ -8,8 +8,8 @@ const loader = new THREE.TextureLoader();
 let isMovingCamera = false;
 let controls;
 
-const planets = []; // Масив для збереження планет і Сонця
-const planetObjects = {}; // Об'єкт для збереження посилань на планети // Масив для збереження планет і Сонця
+const planets = [];
+const planetObjects = {};
 const planetInfo = {
     "Sun": {
         name: "The Sun",
@@ -49,7 +49,87 @@ const planetInfo = {
     }
 };
 
-// Функція для створення планет
+const cameraPositions = {
+    '2d': {
+        position: new THREE.Vector3(0, 300, 0),
+        rotation: new THREE.Euler(-Math.PI / 2, 0, 0)
+    },
+    '3d': {
+        position: new THREE.Vector3(150, 150, 0),
+        rotation: new THREE.Euler(-Math.PI / 2, Math.PI / 4, Math.PI / 2)
+    }
+};
+
+function switchView(mode) {
+    isMovingCamera = true;
+    const targetPosition = cameraPositions[mode].position;
+    const targetRotation = cameraPositions[mode].rotation;
+
+    // Create current position point
+    const currentPosition = {
+        position: camera.position.clone(),
+        rotation: camera.rotation.clone()
+    };
+
+    const duration = 1000;
+    const startTime = Date.now();
+
+    controls.enabled = false;
+
+    function animateCamera() {
+        if (!isMovingCamera) {
+            controls.enabled = true;
+            return;
+        }
+
+        const now = Date.now();
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        const ease = progress * (2 - progress); // Ease function for smoother transition
+
+        // Interpolate position
+        camera.position.lerpVectors(currentPosition.position, targetPosition, ease);
+
+        // Interpolate rotation (angles in Euler)
+        camera.rotation.x = THREE.MathUtils.lerp(currentPosition.rotation.x, targetRotation.x, ease);
+        camera.rotation.y = THREE.MathUtils.lerp(currentPosition.rotation.y, targetRotation.y, ease);
+        camera.rotation.z = THREE.MathUtils.lerp(currentPosition.rotation.z, targetRotation.z, ease);
+
+        if (progress < 1) {
+            requestAnimationFrame(animateCamera);
+        } else {
+            isMovingCamera = false;
+            controls.enabled = true;
+            controls.update();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // Перевіряємо чи checkbox активний по замовчуванню
+        const viewSwitch = document.getElementById("viewSwitch");
+
+        // Якщо checkbox активний (тобто 3D за замовчуванням), змінюємо вигляд
+        if (viewSwitch.checked) {
+            switchView('3d');  // Перемикаємо на 3D
+        } else {
+            switchView('2d');  // Якщо чекбокс не активний, ставимо 2D
+        }
+
+        // Слухач подій для зміни режиму
+        viewSwitch.addEventListener("change", () => {
+            if (viewSwitch.checked) {
+                switchView('3d');  // Якщо 3D режим
+            } else {
+                switchView('2d');  // Якщо 2D режим
+            }
+        });
+    });
+
+    animateCamera();
+}
+
+
 function createPlanet({ radius, texture, bumpMap, bumpScale, position, isSun = false, ring, name }) {
     const geometry = new THREE.SphereGeometry(radius, 32, 32);
     const material = isSun
@@ -67,6 +147,23 @@ function createPlanet({ radius, texture, bumpMap, bumpScale, position, isSun = f
     const planetOrbit = new THREE.Object3D();
     planetOrbit.add(planet);
 
+// Create orbit ring
+    const orbitRadius = position[0]; // Центральний радіус орбіти
+    const orbitGeometry = new THREE.RingGeometry(orbitRadius - 0.5, orbitRadius + 0.5, 64);
+    const orbitMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff, // Білий колір орбіти
+        side: THREE.DoubleSide,
+        opacity: 0.05,
+        transparent: true
+    });
+    const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+    orbit.rotation.x = Math.PI / 2; // Зробити кільце горизонтальним
+    // if(planet !== asteroidBelt){
+        planetOrbit.add(orbit);
+    // }
+
+
+
     if (ring) {
         const ringGeometry = new THREE.RingGeometry(ring.innerRadius, ring.outerRadius, 64);
         const ringMaterial = new THREE.MeshBasicMaterial({
@@ -83,14 +180,16 @@ function createPlanet({ radius, texture, bumpMap, bumpScale, position, isSun = f
     }
 
     scene.add(planetOrbit);
-
-    // Store the planet reference in planetObjects
     planetObjects[name] = planet;
+
+
 
     return { planet, planetOrbit };
 }
 
-// Функція для створення астероїдів
+
+
+
 function createAsteroid(position, radius) {
     const geometry = new THREE.SphereGeometry(radius, 16, 16);
     const material = new THREE.MeshStandardMaterial({ color: 0x888888 });
@@ -99,7 +198,6 @@ function createAsteroid(position, radius) {
     return asteroid;
 }
 
-// Функція для створення кільця астероїдів
 function createAsteroidBelt(innerRadius, outerRadius, numAsteroids) {
     const asteroidBelt = new THREE.Object3D();
     for (let i = 0; i < numAsteroids; i++) {
@@ -113,19 +211,11 @@ function createAsteroidBelt(innerRadius, outerRadius, numAsteroids) {
     }
     scene.add(asteroidBelt);
     return asteroidBelt;
-
 }
-
-// Функція для переміщення камери до об'єкта
-// Update the moveToObject function
-// Move OrbitControls to global scope
-
-
 
 function moveToObject(object) {
     if (!object) return;
 
-    // First, pause the system animation
     isAnimationRunning = false;
     const pauseIcon = document.querySelector('.pause-icon');
     const playIcon = document.querySelector('.play-icon');
@@ -134,7 +224,6 @@ function moveToObject(object) {
         playIcon.style.display = 'block';
     }
 
-    // If camera is already moving, stop the current animation
     if (isMovingCamera) {
         isMovingCamera = false;
         return;
@@ -149,13 +238,12 @@ function moveToObject(object) {
     const startCameraPos = camera.position.clone();
     const startTime = Date.now();
 
-    // Disable OrbitControls during animation
     controls.enabled = false;
 
     function animate() {
         if (!isMovingCamera) {
             isMovingCamera = false;
-            controls.enabled = true;  // Re-enable controls if animation is stopped
+            controls.enabled = true;
             return;
         }
 
@@ -179,9 +267,8 @@ function moveToObject(object) {
             requestAnimationFrame(animate);
         } else {
             isMovingCamera = false;
-            controls.enabled = true;  // Re-enable controls after animation
+            controls.enabled = true;
 
-            // Set the OrbitControls target to the object's position
             controls.target.copy(worldPosition);
             controls.update();
         }
@@ -190,7 +277,6 @@ function moveToObject(object) {
     animate();
 }
 
-// Додавання обробників подій для меню
 function setupMenuListeners() {
     const menuItems = document.querySelectorAll('.header-menu li');
     menuItems.forEach(item => {
@@ -201,7 +287,6 @@ function setupMenuListeners() {
             if (planet) {
                 moveToObject(planet);
 
-                // Show planet information
                 const infoBox = document.getElementById('infoBox');
                 const planetNameElement = document.getElementById('planetName');
                 const planetInfoText = document.getElementById('planetInfo');
@@ -210,7 +295,6 @@ function setupMenuListeners() {
                 planetInfoText.innerText = planetInfo[planetName].info;
                 infoBox.style.display = 'block';
 
-                // Position the info box
                 infoBox.style.left = '20px';
                 infoBox.style.top = '100px';
             }
@@ -218,23 +302,8 @@ function setupMenuListeners() {
     });
 }
 
-const animationButton = document.getElementById('animationButton');
-const playIcon = animationButton.querySelector('.play-icon');
-const pauseIcon = animationButton.querySelector('.pause-icon');
-
-animationButton.addEventListener('click', () => {
-    isAnimationRunning = !isAnimationRunning;
-
-    if (isAnimationRunning) {
-        pauseIcon.style.display = 'block';
-        playIcon.style.display = 'none';
-    } else {
-        pauseIcon.style.display = 'none';
-        playIcon.style.display = 'block';
-    }
-});
-
 function main() {
+
     const canvas = document.querySelector('#c');
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
@@ -247,17 +316,22 @@ function main() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    // new OrbitControls(camera, renderer.domElement);
     controls = new OrbitControls(camera, renderer.domElement);
-
-    controls.enableZoom = true; // Вмикаємо можливість зуму
+    controls.enableZoom = true;
     controls.zoomSpeed = 5;
-    controls.minDistance = 5;    // Мінімальна відстань зуму
+    controls.minDistance = 5;
 
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
-    // Додавання планет і Сонця
+    // Додаємо обробник події для перемикача
+    const viewSwitch = document.getElementById('viewSwitch');
+    viewSwitch.addEventListener('change', (event) => {
+        const mode = event.target.checked ? '3d' : '2d';
+        switchView(mode);
+    });
+    const axesHelper = new THREE.AxesHelper( 500 );
+    scene.add(axesHelper );
     const Sun = createPlanet({
         radius: 20,
         texture: 'textures/0sun/sunmap.jpg',
@@ -353,36 +427,29 @@ function main() {
     });
     planets.push(neptune.planet);
 
-    // Додавання зірок
     const stars = getStarfield({ numStars: 5000 });
     scene.add(stars);
 
-    // Додавання освітлення
     const sunLight = new THREE.PointLight(0xffffff, 10000, 300);
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
 
-    // Подія "mousemove" для взаємодії з об'єктами
     window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('click', onClick);
 
     function onMouseMove(event) {
-        // Нормалізація координат миші
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        // Виявлення об'єктів
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(planets);
 
         if (intersects.length > 0) {
-            document.body.style.cursor = 'pointer';  // Зміна курсора
+            document.body.style.cursor = 'pointer';
         } else {
-            document.body.style.cursor = 'default';  // Повернення до стандартного курсора
+            document.body.style.cursor = 'default';
         }
     }
-
-    // Подія "click" для взаємодії з об'єктами
-    window.addEventListener('click', onClick);
 
     function onClick(event) {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -400,14 +467,12 @@ function main() {
                 const planetNameElement = document.getElementById('planetName');
                 const planetInfoText = document.getElementById('planetInfo');
 
-                // If infoBox is already displayed for this planet, hide it
                 if (
                     infoBox.style.display === 'block' &&
                     planetNameElement.innerText === planetInfo[planetName].name
                 ) {
                     infoBox.style.display = 'none';
                 } else {
-                    // Show info for the newly selected planet
                     planetNameElement.innerText = planetInfo[planetName].name;
                     planetInfoText.innerText = planetInfo[planetName].info;
                     infoBox.style.display = 'block';
@@ -417,12 +482,28 @@ function main() {
                 moveToObject(selectedPlanet, 2);
             }
         } else {
-            // Click outside of any planet - hide the info box
             infoBox.style.display = 'none';
         }
     }
+
     setupMenuListeners();
-    // Анімація
+
+    const animationButton = document.getElementById('animationButton');
+    const playIcon = animationButton.querySelector('.play-icon');
+    const pauseIcon = animationButton.querySelector('.pause-icon');
+
+    animationButton.addEventListener('click', () => {
+        isAnimationRunning = !isAnimationRunning;
+
+        if (isAnimationRunning) {
+            pauseIcon.style.display = 'block';
+            playIcon.style.display = 'none';
+        } else {
+            pauseIcon.style.display = 'none';
+            playIcon.style.display = 'block';
+        }
+    });
+
     const animate = () => {
         requestAnimationFrame(animate);
 
