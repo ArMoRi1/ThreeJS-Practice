@@ -30,8 +30,8 @@ body {
 }
 
 .header-body {
-    display: flex;
-    justify-content: space-between;
+    /*display: flex;*/
+    /*justify-content: space-between;*/
     align-items: center;
 }
 
@@ -40,6 +40,7 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
+    justify-content: space-between;
     gap: 30px;
 }
 
