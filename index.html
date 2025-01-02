@@ -3,164 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
     <title>Solar System</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            position: relative; /* Додано */
-        }
-
-        /* Стилі для canvas */
-        #c {
-            position: fixed; /* змінено з absolute на fixed */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; /* Від'ємний z-index, щоб canvas був під усіма елементами */
-        }
-
-        /* Стилі для header */
-        .header {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 20px 0;
-        }
-
-        .header-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        .header-body {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-menu ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            gap: 30px;
-        }
-
-        .header-menu li {
-            color: white;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-
-        .header-animation {
-            width: 40px; /* Фіксована ширина батьківського контейнера */
-            height: 40px; /* Фіксована висота батьківського контейнера */
-            display: flex; /* Використовуємо flex для центрування кнопки */
-            align-items: center;
-            justify-content: center;
-        }
-
-        #animationButton {
-            width: 100%; /* Займає всю ширину батьківського елемента */
-            height: 100%; /* Займає всю висоту батьківського елемента */
-            background-color: rgba(255, 255, 255, 0.8);
-            border: none;
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            cursor: pointer;
-            display: flex; /* Використовуємо flexbox для центрування іконок */
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .play-icon, .pause-icon {
-            width: 40px;
-            height: 40px;
-        }
-
-        .pause-icon {
-            display: block;
-        }
-
-        .play-icon {
-            display: none;
-        }
-
-        #infoBox {
-            position: fixed; /* змінено з absolute на fixed */
-            top: 20px;
-            left: 20px;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            display: none;
-            max-width: 350px;
-            font-size: 30px;
-            z-index: 10;
-        }
-        .switch-wrapper {
-            display: flex;
-            align-items: center;
-            margin-left: 10px;
-            margin-right: 10px;
-        }
-
-        .switch-wrapper input {
-            display: none;
-        }
-
-        .switch {
-            position: relative;
-            width: 50px;
-            height: 25px;
-            background-color: #ccc;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .switch::before {
-            content: '';
-            position: absolute;
-            width: 23px;
-            height: 23px;
-            background-color: white;
-            border-radius: 50%;
-            top: 1px;
-            left: 1px;
-            transition: transform 0.3s;
-        }
-
-        input:checked + .switch {
-            background-color: #4caf50;
-        }
-
-        input:checked + .switch::before {
-            transform: translateX(25px);
-        }
-        /* Новий стиль для вирівнювання 2D і 3D */
-        .view-toggle {
-            text-align: center;
-            display: flex;
-            align-items: center;
-            margin-left: 20px;
-            justify-content: space-between;
-            width: 100px; /* Фіксована ширина для вирівнювання 2D та 3D */
-        }
-
-        .toggle-label {
-            font-size: 16px;
-            color: white;
-        }
-
-    </style>
 </head>
 <body>
 <header class="header">
@@ -173,15 +17,38 @@
                     <li onclick="setupMenuListeners()">Venus</li>
                     <li onclick="setupMenuListeners()">Earth</li>
                     <li onclick="setupMenuListeners()">Mars</li>
-                    <li onclick="setupMenuListeners()">Asteroid belt</li>
                     <li onclick="setupMenuListeners()">Jupiter</li>
                     <li onclick="setupMenuListeners()">Saturn</li>
                     <li onclick="setupMenuListeners()">Uranus</li>
                     <li onclick="setupMenuListeners()">Neptune</li>
-
                 </ul>
             </div>
-            <div class="header-animation">
+
+        </div>
+    </div>
+</header>
+
+<!-- Бокова панель -->
+<div class="sidebar-left ">
+    <h2>Space objects</h2>
+    <ul>
+        <li onclick="setupMenuListeners()">Sun</li>
+        <li onclick="setupMenuListeners()">Mercury</li>
+        <li onclick="setupMenuListeners()">Venus</li>
+        <li onclick="setupMenuListeners()">Earth</li>
+        <li onclick="setupMenuListeners()">Mars</li>
+        <li onclick="setupMenuListeners()">Jupiter</li>
+        <li onclick="setupMenuListeners()">Saturn</li>
+        <li onclick="setupMenuListeners()">Uranus</li>
+        <li onclick="setupMenuListeners()">Neptune</li>
+    </ul>
+</div>
+
+<div class="sidebar-right">
+    <h2>Control Panel</h2>
+    <ul>
+        <li>
+            <div class="animationButton-container">
                 <button id="animationButton">
                     <svg class="pause-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M10 4H6v16h4V4zm8 0h-4v16h4V4z"/>
@@ -190,43 +57,40 @@
                         <path d="M8 5v14l11-7z"/>
                     </svg>
                 </button>
-
-                <!-- Блок з перемикачем -->
-                <div class="view-toggle">
+                <div class="animationButton-span">
+                    <span>Pause | Go</span>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div class="view-toggle">
+                <div>
                     <span class="toggle-label">2D</span>
-                    <div class="switch-wrapper">
-                        <input type="checkbox" id="viewSwitch" checked>
-                        <label for="viewSwitch" class="switch"></label>
-                    </div>
+                </div>
+                <div class="switch-wrapper">
+                    <input type="checkbox" id="viewSwitch" checked>
+                    <label for="viewSwitch" class="switch"></label>
+                </div>
+                <div>
                     <span class="toggle-label">3D</span>
                 </div>
             </div>
-
-
-        </div>
-    </div>
-</header>
-
+        </li>
+    </ul>
+</div>
 <canvas id="c"></canvas>
 <div id="infoBox">
-    <h2 id="planetName">Planet Name</h2>
-    <p id="planetInfo">Information about the planet will appear here.</p>
+    <h2 id="planetName"></h2>
+    <p id="planetInfo"></p>
 </div>
-
-
-
 <script type="importmap">
-			{
-				"imports": {
-					"three": "https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js",
-          "jsm/": "https://cdn.jsdelivr.net/npm/three@0.161/examples/jsm/"
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js",
+                "jsm/": "https://cdn.jsdelivr.net/npm/three@0.161/examples/jsm/"
+            }
         }
-			}
-		</script>
+    </script>
 <script type="module" src="main.js"></script>
-
-<!--<script type="module" src="node_modules/three/examples/jsm/controls/OrbitControls.js"></script>-->
-<!--<script type="module" src="node_modules/three/build/three.module.js"></script>-->
-<!--<script type="module" src="."></script>-->
 </body>
 </html>
