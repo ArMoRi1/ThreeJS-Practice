@@ -16,24 +16,29 @@ body {
 
 /* Стилі для header */
 .header {
-    position: relative;
+    position: absolute!important;
+    top: 0;
+    left: 0;
     z-index: 10;
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 20px 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    /*padding: 20px 0;*/
+    height: 60px;
+    /*display: flex;*/
+    /*justify-content: space-between;*/
+    /*align-items: center;*/
 }
 
 .header-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 15px;
 }
 
-.header-body {
-    /*display: flex;*/
-    /*justify-content: space-between;*/
-    align-items: center;
-}
 
 .header-menu ul {
     list-style: none;
@@ -41,7 +46,7 @@ body {
     padding: 0;
     display: flex;
     justify-content: space-between;
-    gap: 30px;
+    /*gap: 30px;*/
 }
 
 .header-menu li {
@@ -52,15 +57,15 @@ body {
 
 /* Стиль для бокової панелі */
 .sidebar-left {
-    position: fixed;
-    top: 0;
+    position: absolute;
+    top: 60px;
     left: 0;
     width: 200px;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.8);
-    padding: 20px;
+    padding: 0 20px;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-    z-index: 11;
+    z-index: 9;
 }
 
 .sidebar-left h2 {
@@ -81,15 +86,15 @@ body {
 
 
 .sidebar-right {
-    position: fixed;
-    top: 0;
+    position: absolute;
+    top: 60px;
     right: 0;
     width: 200px;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 20px;
+    background-color: rgba(256, 256, 256, 0.1);
+    padding: 0 20px;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
-    z-index: 11;
+    z-index: 9;
 }
 
 .sidebar-right h2 {

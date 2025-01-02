@@ -7,82 +7,94 @@
     <title>Solar System</title>
 </head>
 <body>
-<header class="header">
-    <div class="header-container">
-        <div class="header-body">
-            <div class="header-menu">
-                <ul>
-                    <li onclick="setupMenuListeners()">Sun</li>
-                    <li onclick="setupMenuListeners()">Mercury</li>
-                    <li onclick="setupMenuListeners()">Venus</li>
-                    <li onclick="setupMenuListeners()">Earth</li>
-                    <li onclick="setupMenuListeners()">Mars</li>
-                    <li onclick="setupMenuListeners()">Jupiter</li>
-                    <li onclick="setupMenuListeners()">Saturn</li>
-                    <li onclick="setupMenuListeners()">Uranus</li>
-                    <li onclick="setupMenuListeners()">Neptune</li>
-                </ul>
-            </div>
+<div class="layout-container">
+    <!-- Left Sidebar -->
+    <aside class="sidebar-left">
+        <h2>Space objects</h2>
+        <ul>
+            <li onclick="setupMenuListeners()">Sun</li>
+            <li onclick="setupMenuListeners()">Mercury</li>
+            <li onclick="setupMenuListeners()">Venus</li>
+            <li onclick="setupMenuListeners()">Earth</li>
+            <li onclick="setupMenuListeners()">Mars</li>
+            <li onclick="setupMenuListeners()">Jupiter</li>
+            <li onclick="setupMenuListeners()">Saturn</li>
+            <li onclick="setupMenuListeners()">Uranus</li>
+            <li onclick="setupMenuListeners()">Neptune</li>
+        </ul>
+    </aside>
 
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-container">
+                <nav class="header-menu">
+                    <ul>
+                        <li onclick="setupMenuListeners()">Sun</li>
+                        <li onclick="setupMenuListeners()">Mercury</li>
+                        <li onclick="setupMenuListeners()">Venus</li>
+                        <li onclick="setupMenuListeners()">Earth</li>
+                        <li onclick="setupMenuListeners()">Mars</li>
+                        <li onclick="setupMenuListeners()">Jupiter</li>
+                        <li onclick="setupMenuListeners()">Saturn</li>
+                        <li onclick="setupMenuListeners()">Uranus</li>
+                        <li onclick="setupMenuListeners()">Neptune</li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Canvas Container -->
+        <div class="canvas-container">
+            <canvas id="c"></canvas>
         </div>
-    </div>
-</header>
 
-<!-- Бокова панель -->
-<div class="sidebar-left ">
-    <h2>Space objects</h2>
-    <ul>
-        <li onclick="setupMenuListeners()">Sun</li>
-        <li onclick="setupMenuListeners()">Mercury</li>
-        <li onclick="setupMenuListeners()">Venus</li>
-        <li onclick="setupMenuListeners()">Earth</li>
-        <li onclick="setupMenuListeners()">Mars</li>
-        <li onclick="setupMenuListeners()">Jupiter</li>
-        <li onclick="setupMenuListeners()">Saturn</li>
-        <li onclick="setupMenuListeners()">Uranus</li>
-        <li onclick="setupMenuListeners()">Neptune</li>
-    </ul>
+        <!-- Info Box -->
+<!--        <div id="infoBox">-->
+<!--            <h2 id="planetName"></h2>-->
+<!--            <p id="planetInfo"></p>-->
+<!--        </div>-->
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="sidebar-right">
+        <h2>Control Panel</h2>
+        <ul>
+            <li>
+                <div class="animationButton-container">
+                    <button id="animationButton">
+                        <svg class="pause-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 4H6v16h4V4zm8 0h-4v16h4V4z"/>
+                        </svg>
+                        <svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <div class="animationButton-span">
+                        <span>Pause | Go</span>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="view-toggle">
+                    <div>
+                        <span class="toggle-label">2D</span>
+                    </div>
+                    <div class="switch-wrapper">
+                        <input type="checkbox" id="viewSwitch" checked>
+                        <label for="viewSwitch" class="switch"></label>
+                    </div>
+                    <div>
+                        <span class="toggle-label">3D</span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </aside>
 </div>
 
-<div class="sidebar-right">
-    <h2>Control Panel</h2>
-    <ul>
-        <li>
-            <div class="animationButton-container">
-                <button id="animationButton">
-                    <svg class="pause-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M10 4H6v16h4V4zm8 0h-4v16h4V4z"/>
-                    </svg>
-                    <svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                </button>
-                <div class="animationButton-span">
-                    <span>Pause | Go</span>
-                </div>
-            </div>
-        </li>
-        <li>
-            <div class="view-toggle">
-                <div>
-                    <span class="toggle-label">2D</span>
-                </div>
-                <div class="switch-wrapper">
-                    <input type="checkbox" id="viewSwitch" checked>
-                    <label for="viewSwitch" class="switch"></label>
-                </div>
-                <div>
-                    <span class="toggle-label">3D</span>
-                </div>
-            </div>
-        </li>
-    </ul>
-</div>
-<canvas id="c"></canvas>
-<div id="infoBox">
-    <h2 id="planetName"></h2>
-    <p id="planetInfo"></p>
-</div>
+<!-- Scripts -->
 <script type="importmap">
         {
             "imports": {
@@ -94,3 +106,4 @@
 <script type="module" src="main.js"></script>
 </body>
 </html>
+
