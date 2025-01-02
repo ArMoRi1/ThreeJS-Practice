@@ -8,6 +8,7 @@ const loader = new THREE.TextureLoader();
 let isMovingCamera = false;
 let controls;
 
+
 const planets = [];
 const planetObjects = {};
 const planetInfo = {
@@ -504,20 +505,26 @@ function main() {
         }
     });
 
+    const slider = document.getElementById('myRange');
+    let animationSpeed = slider.value;
+    slider.addEventListener('input', () => {
+        animationSpeed = slider.value;  // Оновлюємо значення
+    });
+
     const animate = () => {
         requestAnimationFrame(animate);
 
         if (isAnimationRunning) {
-            Sun.planetOrbit.rotateY(0.0004);
-            mercury.planetOrbit.rotateY(0.009);
-            venus.planetOrbit.rotateY(0.006);
-            earth.planetOrbit.rotateY(0.004);
-            mars.planetOrbit.rotateY(0.002);
-            asteroidBelt.rotateY(0.0005);
-            jupiter.planetOrbit.rotateY(0.0010);
-            saturn.planetOrbit.rotateY(0.0008);
-            uranus.planetOrbit.rotateY(0.0006);
-            neptune.planetOrbit.rotateY(0.0004);
+            Sun.planetOrbit.rotateY(0.0004 * animationSpeed);
+            mercury.planetOrbit.rotateY(0.009 * animationSpeed);
+            venus.planetOrbit.rotateY(0.006 * animationSpeed);
+            earth.planetOrbit.rotateY(0.004 * animationSpeed);
+            mars.planetOrbit.rotateY(0.002 * animationSpeed);
+            asteroidBelt.rotateY(0.0005 * animationSpeed);
+            jupiter.planetOrbit.rotateY(0.0010 * animationSpeed);
+            saturn.planetOrbit.rotateY(0.0008 * animationSpeed);
+            uranus.planetOrbit.rotateY(0.0006 * animationSpeed);
+            neptune.planetOrbit.rotateY(0.0004 * animationSpeed);
         }
 
         renderer.render(scene, camera);

@@ -215,5 +215,90 @@ input:checked + .switch::before {
     transform: translateX(calc(285%));
 }
 
+.AnimationSpeedSlider-container{
+    padding: 20px 0;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    position: relative;
+    overflow: visible;
+}
 
+.AnimationSpeedSlider-body{
+    display: flex;
+    flex-direction: column;
+}
+.AnimationSpeedSlider-label{
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+.AnimationSpeedSlider {
+    -webkit-appearance: none;
+    width: 100%; /* Віднімаємо ширину повзунка */
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    outline: none;
+    /*margin: 0 9px 15px 9px; !* Додаємо відступи з обох боків *!*/
+}
+
+/* Slider thumb styles */
+.AnimationSpeedSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 4px;
+    height: 18px;
+    background: #1e90ff;
+    /*border-radius: 50%;*/
+    cursor: pointer;
+    border: none;
+}
+
+.AnimationSpeedSlider::-moz-range-thumb {
+    width: 4px; /* Зробив однакову ширину для всіх браузерів */
+    height: 18px;
+    background: #1e90ff;
+    /*border-radius: 50%;*/
+    cursor: pointer;
+    border: none;
+}
+
+
+/* Tick marks container */
+.tick-marks {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    color: #ffffff;
+    font-size: 18px;
+    width: calc(100% + 4px)
+}
+
+/* Individual tick mark */
+.tick-marks span {
+    position: relative;
+    text-align: center;
+    /*width: 20px;*/
+    /*transform: translateX(-50%);*/
+}
+
+.tick-marks span:first-child {
+    /*transform: translateX(0);*/
+}
+
+.tick-marks span:last-child {
+    /*transform: translateX(-100%);*/
+}
+
+/* Optional: Add hover effects */
+.AnimationSpeedSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+}
+
+.AnimationSpeedSlider::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+}
 
