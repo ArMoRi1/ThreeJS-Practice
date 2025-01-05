@@ -2,16 +2,18 @@ body {
     margin: 0;
     overflow: hidden;
     position: relative;
+
 }
 
 /* Стилі для canvas */
 #c {
-    position: fixed;
+    /*position: fixed;*/
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: -1;
+
 }
 
 /* Стилі для header */
@@ -302,3 +304,58 @@ input:checked + .switch::before {
     transition: transform 0.2s;
 }
 
+
+/**/
+#tooltip {
+    position: fixed;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    pointer-events: none;
+    display: none;
+    z-index: 1000;
+    transform: translate(-50%, -100%);
+}
+
+#tooltip:before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -15px;
+    width: 2px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateX(-50%) rotate(90deg);
+}
+#tooltip:after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -15px;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(256, 256, 256, 0.8) transparent transparent transparent;
+}
+/*#tooltip:after {*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    left: 0;*/
+/*    bottom: -2px;*/
+/*    width: 100%;*/
+/*    height: 2px;*/
+/*    background: rgba(255, 255, 255, 0.8);*/
+/*}*/
+
+/*#tooltip:after {*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    !*left: 50%;*!*/
+/*    bottom: -10px;*/
+/*    !*transform: translateX(-50%);*!*/
+/*    border-width: 5px;*/
+/*    border-style: solid;*/
+/*    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;*/
+/*}*/

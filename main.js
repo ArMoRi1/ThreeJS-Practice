@@ -8,7 +8,6 @@ const loader = new THREE.TextureLoader();
 let isMovingCamera = false;
 let controls;
 
-
 const planets = [];
 const planetObjects = {};
 const planetInfo = {
@@ -160,7 +159,7 @@ function createPlanet({ radius, texture, bumpMap, bumpScale, position, isSun = f
     const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
     orbit.rotation.x = Math.PI / 2; // Зробити кільце горизонтальним
     // if(planet !== asteroidBelt){
-        planetOrbit.add(orbit);
+    planetOrbit.add(orbit);
     // }
 
 
@@ -187,8 +186,6 @@ function createPlanet({ radius, texture, bumpMap, bumpScale, position, isSun = f
 
     return { planet, planetOrbit };
 }
-
-
 
 
 function createAsteroid(position, radius) {
@@ -303,6 +300,101 @@ function setupMenuListeners() {
     });
 }
 
+function canvasCursorType() {
+    const canvas = document.getElementById('c');
+    const viewSwitch = document.getElementById('viewSwitch');
+    let isDragging = false; // додамо змінну для перевірки стану натискання
+
+    canvas.style.cursor = 'grab';
+
+    // Обробляємо натискання миші на canvas
+    canvas.addEventListener('mousedown', () => {
+        isDragging = true; // користувач натиснув і тягне
+        canvas.style.cursor = 'grabbing';
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isDragging = false; // користувач відпустив мишу
+        canvas.style.cursor = 'grab';
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        if (isDragging) {
+            canvas.style.cursor = 'grab'; // якщо миша залишає елемент під час натискання
+            isDragging = false;
+        }
+    });
+
+    // Обробка переміщення миші
+    canvas.addEventListener('mousemove', (event) => {
+        if (!isDragging) {
+            // Не оновлюємо курсор, якщо користувач тягне мишу
+            const is3DMode = viewSwitch.checked;
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(planets, true);
+
+            if (intersects.length > 0) {
+                canvas.style.cursor = 'pointer';
+            } else {
+                canvas.style.cursor = 'grab';
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('c');
+    if (canvas) {
+        canvasCursorType();
+    }
+});
+
+window.addEventListener('click', onClickObject);
+function onClickObject(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(planets);
+    const infoBox = document.getElementById('infoBox');
+
+    if (intersects.length > 0) {
+        const selectedPlanet = intersects[0].object;
+        const planetName = selectedPlanet.userData.planetName;
+
+        if (planetName && planetInfo[planetName]) {
+            const planetNameElement = document.getElementById('planetName');
+            const planetInfoText = document.getElementById('planetInfo');
+
+            if (
+                infoBox.style.display === 'block' &&
+                planetNameElement.innerText === planetInfo[planetName].name
+            ) {
+                infoBox.style.display = 'none';
+            } else {
+                planetNameElement.innerText = planetInfo[planetName].name;
+                planetInfoText.innerText = planetInfo[planetName].info;
+                infoBox.style.display = 'block';
+                infoBox.style.left = `${event.clientX + 20}px`;
+                infoBox.style.top = `${event.clientY + 20}px`;
+            }
+            moveToObject(selectedPlanet, 2);
+        }
+    } else {
+        infoBox.style.display = 'none';
+    }
+}
+
+
+
+
+
+
+
 function main() {
 
     const canvas = document.querySelector('#c');
@@ -316,6 +408,38 @@ function main() {
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+
+
+
+    window.addEventListener('cover', onCoverObject);
+    const tooltip = document.getElementById('tooltip');
+    function onCoverObject(event) {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        tooltip.style.left = event.clientX + 'px';
+        tooltip.style.top = event.clientY + 'px';
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(planets, true);
+
+        if (intersects.length > 0) {
+            const selectedPlanet = intersects[0].object;
+            const planetName = selectedPlanet.userData.planetName;
+
+            if (planetName) {
+                tooltip.style.display = 'block';
+                tooltip.style.left = event.clientX + 'px';
+                tooltip.style.top = (event.clientY - 40) + 'px';
+                tooltip.textContent = planetName;
+            }
+        } else {
+            tooltip.style.display = 'none';
+        }
+    }
+    renderer.domElement.addEventListener('mousemove', onCoverObject);
+    renderer.domElement.addEventListener('mouseout', () => {
+        tooltip.style.display = 'none';
+    });
 
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableZoom = true;
@@ -435,59 +559,10 @@ function main() {
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
 
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('click', onClick);
-
-    function onMouseMove(event) {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(planets);
-
-        if (intersects.length > 0) {
-            document.body.style.cursor = 'pointer';
-        } else {
-            document.body.style.cursor = 'default';
-        }
-    }
-
-    function onClick(event) {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(planets);
-        const infoBox = document.getElementById('infoBox');
-
-        if (intersects.length > 0) {
-            const selectedPlanet = intersects[0].object;
-            const planetName = selectedPlanet.userData.planetName;
-
-            if (planetName && planetInfo[planetName]) {
-                const planetNameElement = document.getElementById('planetName');
-                const planetInfoText = document.getElementById('planetInfo');
-
-                if (
-                    infoBox.style.display === 'block' &&
-                    planetNameElement.innerText === planetInfo[planetName].name
-                ) {
-                    infoBox.style.display = 'none';
-                } else {
-                    planetNameElement.innerText = planetInfo[planetName].name;
-                    planetInfoText.innerText = planetInfo[planetName].info;
-                    infoBox.style.display = 'block';
-                    infoBox.style.left = `${event.clientX + 20}px`;
-                    infoBox.style.top = `${event.clientY + 20}px`;
-                }
-                moveToObject(selectedPlanet, 2);
-            }
-        } else {
-            infoBox.style.display = 'none';
-        }
-    }
-
-    setupMenuListeners();
+    window.addEventListener('load', function () {
+        // Після повного завантаження сторінки
+        setupMenuListeners();
+    });
 
     const animationButton = document.getElementById('animationButton');
     const playIcon = animationButton.querySelector('.play-icon');
