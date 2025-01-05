@@ -78,7 +78,8 @@ function switchView(mode) {
 
     function animateCamera() {
         if (!isMovingCamera) {
-            controls.enabled = true;
+            // Вмикаємо controls тільки для 3D режиму
+            controls.enabled = mode === '3d';
             return;
         }
 
@@ -100,7 +101,8 @@ function switchView(mode) {
             requestAnimationFrame(animateCamera);
         } else {
             isMovingCamera = false;
-            controls.enabled = true;
+            // Вмикаємо controls тільки для 3D режиму
+            controls.enabled = mode === '3d';
             controls.update();
         }
     }
@@ -108,7 +110,7 @@ function switchView(mode) {
     document.addEventListener("DOMContentLoaded", () => {
         // Перевіряємо чи checkbox активний по замовчуванню
         const viewSwitch = document.getElementById("viewSwitch");
-
+        console.log(viewSwitch.checked);
         // Якщо checkbox активний (тобто 3D за замовчуванням), змінюємо вигляд
         if (viewSwitch.checked) {
             switchView('3d');  // Перемикаємо на 3D
